@@ -61,7 +61,7 @@ const project: StellarProject = {
     {
       kind: StellarDatasourceKind.Runtime,
       /* Set this as a logical start block, it might be block 1 (genesis) or when your contract was deployed */
-      startBlock: 600000,
+      startBlock: 720000,
       mapping: {
         file: "./dist/index.js",
         handlers: [
@@ -90,10 +90,9 @@ const project: StellarProject = {
             handler: "handleEvent",
             kind: StellarHandlerKind.Event,
             filter: {
-              /* You can optionally specify a smart contract address here
-                contractId: "" */
+              contractId: "CC6WRJYMZA574TOXNO2ZWU4HIXJ5OLKGB7JF556RKMZPSV2V62SLBTPK",
               topics: [
-                "transfer", // Topic signature(s) for the events, there can be up to 4
+                "add_liquidity", // Topic signature(s) for the events, there can be up to 4
               ],
             },
           },

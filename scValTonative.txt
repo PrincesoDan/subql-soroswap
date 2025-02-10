@@ -1,0 +1,86 @@
+export function scValToNative(scv) {
+  // we use the verbose xdr.ScValType.<type>.value form here because it's faster
+  // than string comparisons and the underlying constants never need to be
+  // updated
+  switch (scv.switch().value) {
+    case xdr.ScValType.scvVoid().value:
+      return null;
+    // these can be converted to bigints directly
+    case xdr.ScValType.scvU64().value:
+    case xdr.ScValType.scvI64().value:
+      return scv.value().toBigInt();
+    // these can be parsed by internal abstractions note that this can also
+    // handle the above two cases, but it's not as efficient (another
+    // type-check, parsing, etc.)
+    case xdr.ScValType.scvU128().value:
+    case xdr.ScValType.scvI128().value:
+    case xdr.ScValType.scvU256().value:
+    case xdr.ScValType.scvI256().value:
+      return scValToBigInt(scv);
+    case xdr.ScValType.scvVec().value:
+      return (scv.vec() ?? []).map(scValToNative);
+    case xdr.ScValType.scvAddress().value:
+      return Address.fromScVal(scv).toString();
+    case xdr.ScValType.scvMap().value:
+      return Object.fromEntries(
+        (scv.map() ?? []).map((entry) => [
+          scValToNative(entry.key()),
+          scValToNative(entry.val())
+        ])
+      );
+    // these return the primitive type directly
+    case xdr.ScValType.scvBool().value:
+    case xdr.ScValType.scvU32().value:
+    case xdr.ScValType.scvI32().value:
+    case xdr.ScValType.scvBytes().value:
+      return scv.value();
+    // Symbols are limited to [a-zA-Z0-9_]+, so we can safely make ascii strings
+    //
+    // Strings, however, are "presented" as strings and we treat them as such
+    // (in other words, string = bytes with a hint that it's text). If the user
+    // encoded non-printable bytes in their string value, that's on them.
+    //
+    // Note that we assume a utf8 encoding (ascii-compatible). For other
+    // encodings, you should probably use bytes anyway. If it cannot be decoded,
+    // the raw bytes are returned.
+    case xdr.ScValType.scvSymbol().value:
+    case xdr.ScValType.scvString().value: {
+      const v = scv.value(); // string|Buffer
+      if (Buffer.isBuffer(v) || ArrayBuffer.isView(v)) {
+        try {
+          return new TextDecoder().decode(v);
+        } catch (e) {
+          return new Uint8Array(v.buffer); // copy of bytes
+        }
+      }
+      return v; // string already
+    }
+    // these can be converted to bigint
+    case xdr.ScValType.scvTimepoint().value:
+    case xdr.ScValType.scvDuration().value:
+      return new xdr.Uint64(scv.value()).toBigInt();
+    case xdr.ScValType.scvError().value:
+      switch (scv.error().switch().value) {
+        // Distinguish errors from the user contract.
+        case xdr.ScErrorType.sceContract().value:
+          return { type: 'contract', code: scv.error().contractCode() };
+        default: {
+          const err = scv.error();
+          return {
+            type: 'system',
+            code: err.code().value,
+            value: err.code().name
+          };
+        }
+      }
+    // in the fallthrough case, just return the underlying value directly
+    default:
+      return scv.value();
+  }
+}
+
+
+
+
+
+

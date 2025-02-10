@@ -124,20 +124,10 @@ Results:
 ### Reset Indexing
 If you need to reset the indexing:
 
-1. Remove cached data:
-```bash
-sudo rm -rf .data
+``bash
+yarn reset
 ```
 
-2. Stop containers:
-```bash
-docker compose stop
-```
-
-3. Remove containers:
-```bash
-docker compose down -v
-```
 
 ## Advanced Configuration
 
@@ -154,7 +144,7 @@ The project supports various types of handlers for both Stellar and Soroban:
 - TransactionHandler
 - EventHandler
 
-Example Event
+### Example Event
 ```
 // SYNC EVENT
 
@@ -173,6 +163,8 @@ pub(crate) fn sync(e: &Env, new_reserve_0: i128, new_reserve_1: i128) {
     e.events().publish(("SoroswapPair", symbol_short!("sync")), event);
 }
 ```
+### Example Contract Mainnet: [CDJDRGUCHANJDXALZVJ5IZVB76HX4MWCON5SHF4DE5HB64CBBR7W2ZCD](https://stellar.expert/explorer/public/contract/CDJDRGUCHANJDXALZVJ5IZVB76HX4MWCON5SHF4DE5HB64CBBR7W2ZCD)
+
 ### Customization
 To customize the implementation:
 

@@ -47,6 +47,10 @@ check proyect.yaml.
 ```bash
 yarn start:docker
 ```
+Dev Mod
+```bash
+yarn start:docker | tee -a "logs_$(date +%Y%m%d_%H%M%S).txt"
+```
 
 The GraphQL playground will be available at `http://localhost:3000`.
 
@@ -124,7 +128,7 @@ Results:
 ### Reset Indexing
 If you need to reset the indexing:
 
-```bash
+``bash
 yarn reset
 ```
 
